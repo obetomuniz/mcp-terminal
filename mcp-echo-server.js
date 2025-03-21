@@ -7,6 +7,7 @@ import { z } from 'zod';
 const app = express();
 app.use(express.json());
 
+// Configuração do CORS para permitir apenas o domínio local
 app.use(cors({
   origin: 'http://localhost:3000',
   methods: ['GET', 'POST'],
@@ -14,15 +15,13 @@ app.use(cors({
 }));
 
 // Debug logger para ajudar no diagnóstico
-const logger = (req, res, next) => {
+app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   if (req.method === 'POST') {
     console.log('Body:', JSON.stringify(req.body, null, 2));
   }
   next();
-};
-
-app.use(logger);
+});
 
 const server = new McpServer({ name: 'EchoServer', version: '1.0.0' });
 
@@ -33,7 +32,7 @@ server.tool(
   async ({ message }) => {
     console.log('Echo tool chamado com message:', message);
     return {
-      content: [{ type: 'text', text: `Echo: ${message}` }]
+      content: [{ type: 'text', text: JSON.stringify({ message }) }]
     };
   }
 );
